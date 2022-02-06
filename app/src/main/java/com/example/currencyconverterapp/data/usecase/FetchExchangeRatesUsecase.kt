@@ -1,8 +1,9 @@
 package com.example.currencyconverterapp.data.usecase
 
 import com.example.currencyconverterapp.data.DataState
-import com.example.currencyconverterapp.data.local.models.CurrencyRates
+import com.example.currencyconverterapp.data.local.models.CurrencyRatesEntity
 import com.example.currencyconverterapp.data.local.repository.LocalRepository
+import com.example.currencyconverterapp.data.model.toDataBaseModel
 import com.example.currencyconverterapp.data.repository.Repository
 import com.example.currencyconverterapp.utils.Constants
 import com.example.currencyconverterapp.utils.StringUtils
@@ -21,37 +22,35 @@ class FetchExchangeRatesUsecase @Inject constructor(
     suspend operator fun invoke(
         source: String,
         amount: Double
-    ): Flow<DataState<MutableList<CurrencyRates>>> {
+    ): Flow<DataState<List<CurrencyRatesEntity>>> {
         return flow {
             val responseFromDatabase = localRepo.getAllCurrencyRates()
-            if ( responseFromDatabase!!.isNullOrEmpty().not()){
-                var convertedList: MutableList<CurrencyRates> = ArrayList()
-                val currencyValue = getCurrencyValue(responseFromDatabase.toMutableList(),amount,source)
-                convertedList = createConvertedList(responseFromDatabase.toMutableList(), currencyValue)
+            if ( responseFromDatabase.isNullOrEmpty().not()){
+                var convertedList: List<CurrencyRatesEntity> = ArrayList()
+                val currencyValue = getCurrencyValue(responseFromDatabase,amount,source)
+                convertedList = createConvertedList(responseFromDatabase, currencyValue)
                 emit(DataState.success(convertedList))
             } else {
                 val rates = repository.getExchangeRates()
                 rates.collect { response ->
                     when (response) {
                         is DataState.Success -> {
-                            var convertedList: MutableList<CurrencyRates> = ArrayList()
-                            var exchangeRatelist: MutableList<CurrencyRates> = ArrayList()
+                            var convertedList: List<CurrencyRatesEntity> = ArrayList()
+                            var exchangeRatelist: List<CurrencyRatesEntity> = ArrayList()
                             if (response.data!!.success) {
-                                exchangeRatelist = mapToExchangeRatesList(response.data.quotes)
-                                exchangeRatelist?.let { listItems ->
-                                    if (listItems.isNotEmpty()) {
-                                        val currencyValue = getCurrencyValue(listItems,amount,source)
-                                        convertedList = createConvertedList(listItems, currencyValue)
-                                    }
+                                exchangeRatelist = response.data.toDataBaseModel()
+                                if (exchangeRatelist.isNotEmpty()) {
+                                    val currencyValue = getCurrencyValue(exchangeRatelist,amount,source)
+                                    convertedList = createConvertedList(exchangeRatelist, currencyValue)
                                 }
                                 localRepo.insertCurrencyRates(exchangeRatelist)
                                 emit(DataState.success(convertedList))
                             } else {
-                                emit(DataState.error<MutableList<CurrencyRates>>(stringUtils.somethingWentWrong()))
+                                emit(DataState.error<List<CurrencyRatesEntity>>(stringUtils.somethingWentWrong()))
                             }
                         }
                         is DataState.Error -> {
-                            emit(DataState.error<MutableList<CurrencyRates>>(stringUtils.somethingWentWrong()))
+                            emit(DataState.error<List<CurrencyRatesEntity>>(stringUtils.somethingWentWrong()))
                         }
                     }
                 }
@@ -61,12 +60,12 @@ class FetchExchangeRatesUsecase @Inject constructor(
 
 
     private fun createConvertedList(
-        list: MutableList<CurrencyRates>,
+        list: List<CurrencyRatesEntity>,
         currencyValue: Double
-    ): MutableList<CurrencyRates> {
-        val convertedList: MutableList<CurrencyRates> = ArrayList()
+    ): List<CurrencyRatesEntity> {
+        val convertedList: MutableList<CurrencyRatesEntity> = ArrayList()
         list.forEach {
-            val obj = CurrencyRates(
+            val obj = CurrencyRatesEntity(
                 currencyName = if (it.currencyName == Constants.REMOVE_SOURCE_STRING_FOR_USD) {
                     Constants.DEFAULT_SOURCE_CURRENCY
                 } else it.currencyName.replace(
@@ -83,20 +82,7 @@ class FetchExchangeRatesUsecase @Inject constructor(
         return convertedList
     }
 
-    private fun mapToExchangeRatesList(quotesMap: HashMap<String, Double>): MutableList<CurrencyRates> {
-        var exchangeRatelist: MutableList<CurrencyRates> = ArrayList()
-        quotesMap.map { pair ->
-            CurrencyRates(
-                pair.key,
-                pair.value
-            )
-        }.run {
-            exchangeRatelist.addAll(this)
-        }
-        return exchangeRatelist
-    }
-
-    private fun getCurrencyValue(list: MutableList<CurrencyRates>, amount: Double, source: String) =
+    private fun getCurrencyValue(list: List<CurrencyRatesEntity>, amount: Double, source: String) =
         amount / list.filter {
             it.currencyName.contains(source)
         }.map {

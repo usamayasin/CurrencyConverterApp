@@ -1,8 +1,8 @@
 package com.example.currencyconverterapp.data.remote
 
 import com.example.currencyconverterapp.BuildConfig
-import com.example.currencyconverterapp.data.model.CurrenciesResponse
-import com.example.currencyconverterapp.data.model.ExchangeRatesResponse
+import com.example.currencyconverterapp.data.model.CurrenciesDTO
+import com.example.currencyconverterapp.data.model.ExchangeRatesDTO
 import com.example.currencyconverterapp.utils.Constants.CURRENCIES_END_POINT
 import com.example.currencyconverterapp.utils.Constants.DEFAULT_SOURCE_CURRENCY
 import com.example.currencyconverterapp.utils.Constants.LIVE_END_POINT
@@ -15,11 +15,11 @@ interface ApiService {
     suspend fun getExchangeRates(
         @Query("source") source: String = DEFAULT_SOURCE_CURRENCY,
         @Query("access_key") apiKey: String = BuildConfig.API_KEY
-    ): ApiResponse<ExchangeRatesResponse>
+    ): ApiResponse<ExchangeRatesDTO>
 
     @GET(CURRENCIES_END_POINT)
     suspend fun getCurrencies(
         @Query("access_key") apiKey: String = BuildConfig.API_KEY
-    ): ApiResponse<CurrenciesResponse>
+    ): ApiResponse<CurrenciesDTO>
 
 }

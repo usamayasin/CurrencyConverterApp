@@ -1,7 +1,6 @@
 package com.example.currencyconverterapp.di.modules
 
 import android.app.Application
-import com.example.currencyconverterapp.data.local.repository.LocalRepository
 import com.example.currencyconverterapp.data.remote.ApiService
 import com.example.currencyconverterapp.data.repository.Repository
 import com.example.currencyconverterapp.data.repository.RepositoryImpl
@@ -27,7 +26,7 @@ class RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideRepository(stringUtils: StringUtils, apiService: ApiService,localRepository: LocalRepository): Repository {
-        return RepositoryImpl(stringUtils, apiService,localRepository)
+    fun provideRepository(stringUtils: StringUtils, apiService: ApiService): Repository {
+        return RepositoryImpl(stringUtils, apiService)
     }
 }

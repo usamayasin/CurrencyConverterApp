@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.example.currencyconverterapp.data.local.models.CurrencyRates
+import com.example.currencyconverterapp.data.local.models.CurrencyRatesEntity
 import com.example.currencyconverterapp.databinding.ItemCurrencyQuotesBinding
 import javax.inject.Inject
 
@@ -30,19 +30,19 @@ class ExchangeRatesAdapter @Inject constructor() :
 
     inner class RatesViewHolder(private val itemBinding: ItemCurrencyQuotesBinding) :
         RecyclerView.ViewHolder(itemBinding.root) {
-        fun bind(model: CurrencyRates, position: Int) {
+        fun bind(model: CurrencyRatesEntity, position: Int) {
             itemBinding.apply {
                 data = model
             }
         }
     }
 
-    private val differCallBack  = object : DiffUtil.ItemCallback<CurrencyRates, >() {
+    private val differCallBack  = object : DiffUtil.ItemCallback<CurrencyRatesEntity, >() {
 
-        override fun areItemsTheSame(oldItem: CurrencyRates, newItem: CurrencyRates, ): Boolean {
+        override fun areItemsTheSame(oldItem: CurrencyRatesEntity, newItem: CurrencyRatesEntity, ): Boolean {
             return  oldItem.currencyName == newItem.currencyName
         }
-        override fun areContentsTheSame(oldItem: CurrencyRates, newItem: CurrencyRates, ): Boolean {
+        override fun areContentsTheSame(oldItem: CurrencyRatesEntity, newItem: CurrencyRatesEntity, ): Boolean {
             return  oldItem==newItem
         }
     }

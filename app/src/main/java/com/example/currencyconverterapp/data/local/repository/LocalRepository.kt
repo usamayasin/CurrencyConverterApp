@@ -1,28 +1,25 @@
 package com.example.currencyconverterapp.data.local.repository
 
 import com.example.currencyconverterapp.data.local.dao.CurrenciesDao
-import com.example.currencyconverterapp.data.local.models.CurrencyNames
-import com.example.currencyconverterapp.data.local.models.CurrencyRates
-import kotlinx.coroutines.flow.Flow
+import com.example.currencyconverterapp.data.local.models.CurrencyNamesEntity
+import com.example.currencyconverterapp.data.local.models.CurrencyRatesEntity
 import javax.inject.Inject
 
 class LocalRepository @Inject constructor(var currenciesDao: CurrenciesDao) {
 
-    val storeCurrencies = currenciesDao.getAllCurrencyNames()
-
-    fun insertCurrencyNames(currencyNames: List<CurrencyNames>) {
-        currenciesDao.insertCurrencyNames(currencyNames)
+    fun insertCurrencyNames(currencyNameEntities: List<CurrencyNamesEntity>) {
+        currenciesDao.insertCurrencyNames(currencyNameEntities)
     }
 
-    fun getAllCurrencyNames(): Flow<List<CurrencyNames>>? {
+    fun getAllCurrencyNames(): List<CurrencyNamesEntity> {
         return currenciesDao.getAllCurrencyNames()
     }
 
-    fun insertCurrencyRates(currencyRates: List<CurrencyRates>) {
-        currenciesDao.insertCurrencyRates(currencyRates)
+    fun insertCurrencyRates(currencyRateEntities: List<CurrencyRatesEntity>) {
+        currenciesDao.insertCurrencyRates(currencyRateEntities)
     }
 
-    fun getAllCurrencyRates(): List<CurrencyRates>? {
+    fun getAllCurrencyRates(): List<CurrencyRatesEntity> {
         return currenciesDao.getAllCurrencyRates()
     }
 }

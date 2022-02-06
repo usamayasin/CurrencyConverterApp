@@ -5,12 +5,12 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.currencyconverterapp.data.local.dao.CurrenciesDao
-import com.example.currencyconverterapp.data.local.models.CurrencyNames
-import com.example.currencyconverterapp.data.local.models.CurrencyRates
+import com.example.currencyconverterapp.data.local.models.CurrencyNamesEntity
+import com.example.currencyconverterapp.data.local.models.CurrencyRatesEntity
 import com.example.currencyconverterapp.utils.Constants.DATABASE_NAME
 
 @Database(
-    entities = [CurrencyRates::class, CurrencyNames::class],
+    entities = [CurrencyRatesEntity::class, CurrencyNamesEntity::class],
     version = 1,
     exportSchema = false
 )

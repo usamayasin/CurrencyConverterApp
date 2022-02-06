@@ -1,6 +1,5 @@
 package com.example.currencyconverterapp.data.remote
 
-import com.example.currencyconverterapp.data.remote.ApiResponse
 import okhttp3.Request
 import okio.Timeout
 import retrofit2.Call

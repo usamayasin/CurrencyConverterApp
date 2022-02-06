@@ -4,23 +4,22 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.currencyconverterapp.data.local.models.CurrencyNames
-import com.example.currencyconverterapp.data.local.models.CurrencyRates
+import com.example.currencyconverterapp.data.local.models.CurrencyNamesEntity
+import com.example.currencyconverterapp.data.local.models.CurrencyRatesEntity
 import com.example.currencyconverterapp.utils.Constants.TABLE_CURRENCY
 import com.example.currencyconverterapp.utils.Constants.TABLE_CURRENCY_RATES
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 abstract class CurrenciesDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insertCurrencyNames(currencyNames: List<CurrencyNames>)
+    abstract fun insertCurrencyNames(currencyNameEntities: List<CurrencyNamesEntity>)
 
     @Query("Select *FROM $TABLE_CURRENCY")
-    abstract fun getAllCurrencyNames(): Flow<List<CurrencyNames>>?
+    abstract fun getAllCurrencyNames(): List<CurrencyNamesEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insertCurrencyRates(currencyRates: List<CurrencyRates>)
+    abstract fun insertCurrencyRates(currencyRateEntities: List<CurrencyRatesEntity>)
 
     @Query("Select *FROM $TABLE_CURRENCY_RATES")
-    abstract fun getAllCurrencyRates(): List<CurrencyRates>?
+    abstract fun getAllCurrencyRates(): List<CurrencyRatesEntity>
 }

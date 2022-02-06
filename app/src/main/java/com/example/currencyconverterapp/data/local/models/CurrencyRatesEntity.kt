@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 import com.example.currencyconverterapp.utils.Constants.TABLE_CURRENCY_RATES
 
 @Entity(tableName = TABLE_CURRENCY_RATES)
-data class CurrencyRates(
+data class CurrencyRatesEntity(
     @PrimaryKey
     var currencyName: String,
     var currencyExchangeValue: Double
