@@ -12,21 +12,21 @@ import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.example.currencyconverterapp.R
 import com.example.currencyconverterapp.adapters.ExchangeRatesAdapter
-import com.example.currencyconverterapp.data.model.CurrenciesResponse
-import com.example.currencyconverterapp.data.model.Currency
+import com.example.currencyconverterapp.data.local.models.CurrencyNames
+import com.example.currencyconverterapp.data.local.models.CurrencyRates
 import com.example.currencyconverterapp.databinding.ActivityMainBinding
 import com.example.currencyconverterapp.utils.Constants
 import com.example.currencyconverterapp.utils.gone
 import com.example.currencyconverterapp.utils.visible
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.*
+import kotlin.collections.ArrayList
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     private lateinit var bi: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
-    private var currencies: HashMap<String, String> = HashMap()
+    private var currencies: MutableList<CurrencyNames> = ArrayList<CurrencyNames>()
     private var selectedCurrency: String = Constants.DEFAULT_SOURCE_CURRENCY
     private lateinit var exchangeRatesAdapter: ExchangeRatesAdapter
 
@@ -89,14 +89,14 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         }
         viewModel.uiStateLiveData.observe(this,uiStateObserver)
 
-        val currenciesObserver = Observer<CurrenciesResponse> { response ->
+        val currenciesObserver = Observer<List<CurrencyNames>> { response ->
             // Update the UI, in this case
             response?.let {
-                currencies = response.currencies
+                currencies = response.toMutableList()
                 val adapter = ArrayAdapter(
                     this,
                     android.R.layout.simple_spinner_item,
-                    response.currencies.values.toMutableList().also { it.sort() }
+                    response.map { it.currencyCountryName }.sorted()
                 )
                 bi.currenciesSpinner.adapter = adapter
             }
@@ -130,7 +130,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         }
         viewModel.exchangeRateUiStateLiveData.observe(this, exchangeRatesUiStateObserver)
 
-        val exchangeRatesObserver = Observer<List<Currency>> { response ->
+        val exchangeRatesObserver = Observer<List<CurrencyRates>> { response ->
             // Update the UI, in this case
             response?.let {
                 if (response.isNotEmpty()) {
@@ -155,9 +155,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
         bi.currenciesSpinner.setSelection(pos)
-        selectedCurrency = Constants.DEFAULT_SOURCE_CURRENCY + currencies.filter {
-            it.value == bi.currenciesSpinner.selectedItem.toString()
-        }.keys.first()
+        selectedCurrency = Constants.DEFAULT_SOURCE_CURRENCY + currencies.single() {
+            it.currencyCountryName == bi.currenciesSpinner.selectedItem.toString()
+        }.currencyName
     }
 
     override fun onNothingSelected(p0: AdapterView<*>?) {

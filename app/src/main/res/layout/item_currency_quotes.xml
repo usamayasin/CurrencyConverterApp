@@ -5,7 +5,7 @@
     <data>
         <variable
             name="data"
-            type="com.example.currencyconverterapp.data.model.Currency" />
+            type="com.example.currencyconverterapp.data.local.models.CurrencyRates" />
     </data>
 
     <FrameLayout
@@ -46,7 +46,7 @@
                     android:id="@+id/tvExchangeValue"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@{Double.toString(data.exchangedValue)}"
+                    android:text="@{Double.toString(data.currencyExchangeValue)}"
                     android:textColor="@color/black"
                     android:textSize="@dimen/text_size_1x"
                     android:gravity="center"

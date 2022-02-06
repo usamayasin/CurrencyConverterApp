@@ -11,6 +11,6 @@ import kotlinx.coroutines.flow.Flow
  */
 interface Repository {
 
-    suspend fun getCurrencies(): Flow<DataState<CurrenciesResponse>>
+    suspend fun getCurrencies(): Flow<DataState<String>>
     suspend fun getExchangeRates(): Flow<DataState<ExchangeRatesResponse>>
 }
