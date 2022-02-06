@@ -3,4 +3,5 @@
     <string name="message_no_network_connected_str">No network connected!</string>
     <string name="message_something_went_wrong_str">Something went wrong!</string>
     <string name="action_retry_str">Retry</string>
+    <string name="enter_amount_error">Please Enter Amount </string>
 </resources>

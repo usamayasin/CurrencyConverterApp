@@ -2,6 +2,7 @@ package com.example.currencyconverterapp.data.repository
 
 import com.example.currencyconverterapp.data.DataState
 import com.example.currencyconverterapp.data.model.CurrenciesResponse
+import com.example.currencyconverterapp.data.model.ExchangeRatesResponse
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -11,5 +12,5 @@ import kotlinx.coroutines.flow.Flow
 interface Repository {
 
     suspend fun getCurrencies(): Flow<DataState<CurrenciesResponse>>
-//    suspend fun getComments(postId: Int): Flow<DataState<List<CommentModel>>>
+    suspend fun getExchangeRates(): Flow<DataState<ExchangeRatesResponse>>
 }

@@ -4,6 +4,7 @@ import androidx.annotation.WorkerThread
 import com.example.currencyconverterapp.data.DataState
 import com.example.currencyconverterapp.data.remote.*
 import com.example.currencyconverterapp.data.model.CurrenciesResponse
+import com.example.currencyconverterapp.data.model.ExchangeRatesResponse
 import com.example.currencyconverterapp.utils.StringUtils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -34,6 +35,27 @@ class RepositoryImpl @Inject constructor(
                         emit(DataState.error<CurrenciesResponse>(stringUtils.noNetworkErrorMessage()))
                     } else {
                         emit(DataState.error<CurrenciesResponse>(stringUtils.somethingWentWrong()))
+                    }
+                }
+            }
+        }
+    }
+
+    override suspend fun getExchangeRates(): Flow<DataState<ExchangeRatesResponse>> {
+        return flow {
+            apiService.getExchangeRates().apply {
+                this.onSuccessSuspend {
+                    data?.let {
+                        if (it.success) emit(DataState.success(it))
+                        else emit(DataState.error<ExchangeRatesResponse>(stringUtils.somethingWentWrong()))
+                    }
+                }.onErrorSuspend {
+                    emit(DataState.error<ExchangeRatesResponse>(message()))
+                }.onExceptionSuspend {
+                    if (this.exception is IOException) {
+                        emit(DataState.error<ExchangeRatesResponse>(stringUtils.noNetworkErrorMessage()))
+                    } else {
+                        emit(DataState.error<ExchangeRatesResponse>(stringUtils.somethingWentWrong()))
                     }
                 }
             }
