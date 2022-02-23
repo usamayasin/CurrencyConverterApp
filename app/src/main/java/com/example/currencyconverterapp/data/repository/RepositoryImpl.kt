@@ -3,8 +3,8 @@ package com.example.currencyconverterapp.data.repository
 import androidx.annotation.WorkerThread
 import com.example.currencyconverterapp.data.DataState
 import com.example.currencyconverterapp.data.remote.*
-import com.example.currencyconverterapp.data.model.CurrenciesResponse
-import com.example.currencyconverterapp.data.model.ExchangeRatesResponse
+import com.example.currencyconverterapp.data.model.CurrenciesDTO
+import com.example.currencyconverterapp.data.model.ExchangeRatesDTO
 import com.example.currencyconverterapp.utils.StringUtils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -16,46 +16,51 @@ import javax.inject.Inject
  */
 class RepositoryImpl @Inject constructor(
     private val stringUtils: StringUtils,
-    private val apiService: ApiService
+    private val apiService: ApiService,
 ) : Repository {
 
     @WorkerThread
-    override suspend fun getCurrencies(): Flow<DataState<CurrenciesResponse>> {
+    override suspend fun getCurrencies(): Flow<DataState<CurrenciesDTO>> {
         return flow {
             apiService.getCurrencies().apply {
                 this.onSuccessSuspend {
                     data?.let {
-                        if(it.success) emit(DataState.success(it))
-                        else emit(DataState.error<CurrenciesResponse>(message = stringUtils.somethingWentWrong()))
+                        if(it.success) {
+                            emit(DataState.success(it))
+                        } else {
+                            emit(DataState.error<CurrenciesDTO>(message = stringUtils.somethingWentWrong()))
+                        }
+                    }?:run{
+                        emit(DataState.error<CurrenciesDTO>(message = stringUtils.somethingWentWrong()))
                     }
                 }.onErrorSuspend {
-                    emit(DataState.error<CurrenciesResponse>(message()))
+                    emit(DataState.error<CurrenciesDTO>(message()))
                 }.onExceptionSuspend {
                     if (this.exception is IOException) {
-                        emit(DataState.error<CurrenciesResponse>(stringUtils.noNetworkErrorMessage()))
+                        emit(DataState.error<CurrenciesDTO>(stringUtils.noNetworkErrorMessage()))
                     } else {
-                        emit(DataState.error<CurrenciesResponse>(stringUtils.somethingWentWrong()))
+                        emit(DataState.error<CurrenciesDTO>(stringUtils.somethingWentWrong()))
                     }
                 }
             }
         }
     }
 
-    override suspend fun getExchangeRates(): Flow<DataState<ExchangeRatesResponse>> {
+    override suspend fun getExchangeRates(): Flow<DataState<ExchangeRatesDTO>> {
         return flow {
             apiService.getExchangeRates().apply {
                 this.onSuccessSuspend {
                     data?.let {
                         if (it.success) emit(DataState.success(it))
-                        else emit(DataState.error<ExchangeRatesResponse>(stringUtils.somethingWentWrong()))
+                        else emit(DataState.error<ExchangeRatesDTO>(stringUtils.somethingWentWrong()))
                     }
                 }.onErrorSuspend {
-                    emit(DataState.error<ExchangeRatesResponse>(message()))
+                    emit(DataState.error<ExchangeRatesDTO>(message()))
                 }.onExceptionSuspend {
                     if (this.exception is IOException) {
-                        emit(DataState.error<ExchangeRatesResponse>(stringUtils.noNetworkErrorMessage()))
+                        emit(DataState.error<ExchangeRatesDTO>(stringUtils.noNetworkErrorMessage()))
                     } else {
-                        emit(DataState.error<ExchangeRatesResponse>(stringUtils.somethingWentWrong()))
+                        emit(DataState.error<ExchangeRatesDTO>(stringUtils.somethingWentWrong()))
                     }
                 }
             }

@@ -1,8 +1,8 @@
 package com.example.currencyconverterapp.data.repository
 
 import com.example.currencyconverterapp.data.DataState
-import com.example.currencyconverterapp.data.model.CurrenciesResponse
-import com.example.currencyconverterapp.data.model.ExchangeRatesResponse
+import com.example.currencyconverterapp.data.model.CurrenciesDTO
+import com.example.currencyconverterapp.data.model.ExchangeRatesDTO
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -11,6 +11,6 @@ import kotlinx.coroutines.flow.Flow
  */
 interface Repository {
 
-    suspend fun getCurrencies(): Flow<DataState<CurrenciesResponse>>
-    suspend fun getExchangeRates(): Flow<DataState<ExchangeRatesResponse>>
+    suspend fun getCurrencies(): Flow<DataState<CurrenciesDTO>>
+    suspend fun getExchangeRates(): Flow<DataState<ExchangeRatesDTO>>
 }

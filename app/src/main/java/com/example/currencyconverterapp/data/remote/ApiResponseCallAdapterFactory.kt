@@ -1,6 +1,5 @@
 package com.example.currencyconverterapp.data.remote
 
-import com.example.currencyconverterapp.data.remote.ApiResponse
 import retrofit2.Call
 import retrofit2.CallAdapter
 import retrofit2.Retrofit

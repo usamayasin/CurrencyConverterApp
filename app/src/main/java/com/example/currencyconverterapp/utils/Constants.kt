@@ -8,9 +8,10 @@ object Constants {
     const val TIME_OUT = 1500L
 
     //Other constants
-    const val DATABASE_NAME = "currency_converter_db"
-    const val SEARCH_TIME_DELAY = 300L
     const val DEFAULT_SOURCE_CURRENCY = "USD"
     const val REMOVE_SOURCE_STRING_FOR_USD = "USDUSD"
-    const val KEY_SELECTED_CURRENCY = "SelectedCurrency"
+    const val WORKER_TAG = "FetchDataWorker"
+    const val DATABASE_NAME = "myDataBase.db"
+    const val TABLE_CURRENCY = "currencies"
+    const val TABLE_CURRENCY_RATES = "currency_rates"
 }
