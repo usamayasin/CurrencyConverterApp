@@ -32,6 +32,7 @@ An simple currency converter app utilizing CurrentLayer API.
   - [Hilt](https://dagger.dev/hilt) - Easier way to incorporate Dagger DI into Android apps.
 - [Room](https://developer.android.com/reference/androidx/room/package-summary) - For saving Data in local DB and to provide offline support.
 - [Retrofit](https://square.github.io/retrofit/) - A type-safe HTTP client for Android and Java.
+- [Work Manager](https://developer.android.com/reference/androidx/work/WorkManager) - WorkManager the recommended library for persistent work.
 - [Material Components for Android](https://github.com/material-components/material-components-android) - Modular and customizable Material Design UI components for Android.
 - [Gradle Kotlin DSL](https://docs.gradle.org/current/userguide/kotlin_dsl.html) - For writing Gradle build scripts using Kotlin.
 - [MockK](https://mockk.io) - For Mocking and Unit Testing
