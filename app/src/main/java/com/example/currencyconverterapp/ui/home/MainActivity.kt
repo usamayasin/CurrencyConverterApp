@@ -8,23 +8,33 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.currencyconverterapp.R
 import com.example.currencyconverterapp.adapters.ExchangeRatesAdapter
+import com.example.currencyconverterapp.base.BaseActivity
 import com.example.currencyconverterapp.data.local.models.CurrencyNamesEntity
 import com.example.currencyconverterapp.data.local.models.CurrencyRatesEntity
+import com.example.currencyconverterapp.data.remote.DataState
 import com.example.currencyconverterapp.databinding.ActivityMainBinding
 import com.example.currencyconverterapp.utils.Constants
 import com.example.currencyconverterapp.utils.gone
 import com.example.currencyconverterapp.utils.visible
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.collections.ArrayList
+import com.example.currencyconverterapp.data.remote.DataState.CustomMessages.*
+import com.example.currencyconverterapp.utils.flowWithLifecycle
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
+class MainActivity : BaseActivity(), AdapterView.OnItemSelectedListener {
 
-    private lateinit var bi: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
     private var currencyEntities: MutableList<CurrencyNamesEntity> = ArrayList<CurrencyNamesEntity>()
     private var selectedCurrency: String = Constants.DEFAULT_SOURCE_CURRENCY
@@ -33,28 +43,36 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        bi = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(bi.root)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         initListener()
+        collectFlows()
         initObservations()
+    }
+
+    private fun collectFlows() {
+        lifecycleScope.launch {
+        launch {
+            viewModel.responseMessage.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).collect {
+                showSnackbar(it, binding.rootView)
+            }
+        }
+
+        }
     }
 
     private fun initListener() {
 
-        Glide.with(this)
-            .load(R.drawable.loader_icon)
-            .into(bi.ivConversionIcon);
-
-        bi.currenciesSpinner.onItemSelectedListener = this
+        binding.currenciesSpinner.onItemSelectedListener = this
         exchangeRatesAdapter = ExchangeRatesAdapter()
-        bi.rvConvertedCurrencies.adapter = exchangeRatesAdapter
-        bi.btnConvert.setOnClickListener {
+        binding.rvConvertedCurrencies.adapter = exchangeRatesAdapter
+        binding.btnConvert.setOnClickListener {
             if (checkValidation()) {
                 hideKeyboard()
                 viewModel.fetchExchangeRates(
                     selectedCurrency,
-                    bi.etAmount.text.toString().toDouble()
+                    binding.etAmount.text.toString().toDouble()
                 )
             }
         }
@@ -62,32 +80,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     private fun initObservations() {
 
-        val uiStateObserver = Observer<UIState> { uiState ->
-            // Update the UI, in this case
-            when (uiState) {
-                is LoadingState -> {
-                    bi.progressBarCurrencies.visible()
-                    bi.errorMessageLayout.root.gone()
-                    bi.ivConversionIcon.visible()
-                }
-                is EmptyState -> {
-                    bi.progressBarCurrencies.gone()
-                    bi.ivConversionIcon.gone()
-                    bi.errorMessageLayout.root.visible()
-                }
-                is ContentState -> {
-                    bi.progressBarCurrencies.gone()
-                    bi.ivConversionIcon.visible()
-                    bi.errorMessageLayout.root.gone()
-                }
-                is ErrorState -> {
-                    bi.progressBarCurrencies.gone()
-                    bi.ivConversionIcon.gone()
-                    bi.errorMessageLayout.root.visible()
-                }
-            }
-        }
-        viewModel.uiStateLiveData.observe(this,uiStateObserver)
 
         val currenciesObserver = Observer<List<CurrencyNamesEntity>> { response ->
             // Update the UI, in this case
@@ -98,39 +90,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                     android.R.layout.simple_spinner_item,
                     response.map { it.currencyCountryName }.sorted()
                 )
-                bi.currenciesSpinner.adapter = adapter
+                binding.currenciesSpinner.adapter = adapter
             }
         }
         viewModel.currenciesLiveData.observe(this, currenciesObserver)
 
-        val exchangeRatesUiStateObserver = Observer<UIState> { uiState ->
-            // Update the UI, in this case
-            when (uiState) {
-                is LoadingState -> {
-                    bi.ivConversionIcon.visible()
-                    bi.rvConvertedCurrencies.gone()
-                    bi.errorMessageLayout.root.gone()
-                }
-                is EmptyState -> {
-                    bi.ivConversionIcon.gone()
-                    bi.rvConvertedCurrencies.gone()
-                    bi.errorMessageLayout.root.visible()
-                }
-                is ContentState -> {
-                    bi.ivConversionIcon.gone()
-                    bi.errorMessageLayout.root.gone()
-                    bi.rvConvertedCurrencies.visible()
-                }
-                is ErrorState -> {
-                    bi.ivConversionIcon.gone()
-                    bi.rvConvertedCurrencies.gone()
-                    bi.errorMessageLayout.root.visible()
-                }
-            }
-        }
-        viewModel.exchangeRateUiStateLiveData.observe(this, exchangeRatesUiStateObserver)
-
-        val exchangeRatesObserver = Observer<List<CurrencyRatesEntity>> { response ->
+           val exchangeRatesObserver = Observer<List<CurrencyRatesEntity>> { response ->
             // Update the UI, in this case
             response?.let {
                 if (response.isNotEmpty()) {
@@ -141,22 +106,23 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         viewModel.exchangeRatesEntityLiveData.observe(this, exchangeRatesObserver)
     }
 
-    private fun checkValidation(): Boolean {
-        bi.etAmount.error = null
-        if (bi.etAmount.text.isNullOrEmpty() ||
-            bi.etAmount.text.isNullOrBlank() ||
-            bi.etAmount.text?.trim().toString() == ".") {
 
-            bi.etAmount.error = getString(R.string.enter_amount_error)
+    private fun checkValidation(): Boolean {
+        binding.etAmount.error = null
+        if (binding.etAmount.text.isNullOrEmpty() ||
+            binding.etAmount.text.isNullOrBlank() ||
+            binding.etAmount.text?.trim().toString() == ".") {
+
+            binding.etAmount.error = getString(R.string.enter_amount_error)
             return false
         }
         return true
     }
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
-        bi.currenciesSpinner.setSelection(pos)
+        binding.currenciesSpinner.setSelection(pos)
         selectedCurrency = Constants.DEFAULT_SOURCE_CURRENCY + currencyEntities.single() {
-            it.currencyCountryName == bi.currenciesSpinner.selectedItem.toString()
+            it.currencyCountryName == binding.currenciesSpinner.selectedItem.toString()
         }.currencyName
     }
 

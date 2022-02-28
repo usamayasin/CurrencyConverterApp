@@ -22,10 +22,12 @@ sealed class ApiResponse<out T> {
      * 2) ### Exception response e.g. network connection error
      */
     sealed class ApiFailureResponse<T> {
-        data class Error<T>(val response: Response<T>) : ApiResponse<T>()
+        data class Error<T>(val response: Response<T>) : ApiResponse<T>(){
+            val error: DataState.CustomMessages = handleException<Int>(response.code(), response.message())
+        }
 
         data class Exception<T>(val exception: Throwable) : ApiResponse<T>() {
-            val message: String? = exception.localizedMessage
+            val error: DataState.CustomMessages  = handleException<java.lang.Exception>(exception as kotlin.Exception)
         }
     }
 

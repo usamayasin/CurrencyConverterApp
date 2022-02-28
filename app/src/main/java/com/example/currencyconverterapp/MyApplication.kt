@@ -1,6 +1,7 @@
 package com.example.currencyconverterapp
 
 import android.app.Application
+import androidx.appcompat.app.AlertDialog
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -18,6 +19,30 @@ import javax.inject.Inject
 @HiltAndroidApp
 class MyApplication : Application(), Configuration.Provider {
 
+
+
+    init {
+        instance = this
+    }
+
+
+    companion object {
+
+        private var instance: MyApplication? = null
+        fun getInstance(): MyApplication {
+            synchronized(MyApplication::class.java) {
+                if (instance == null)
+                 instance =
+                   MyApplication()
+
+            }
+            return instance!!
+        }
+
+
+
+
+    }
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
     private val scope = CoroutineScope(Dispatchers.IO)

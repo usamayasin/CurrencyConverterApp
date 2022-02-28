@@ -1,8 +1,8 @@
 package com.example.currencyconverterapp.data.repository
 
-import com.example.currencyconverterapp.data.DataState
 import com.example.currencyconverterapp.data.model.CurrenciesDTO
 import com.example.currencyconverterapp.data.model.ExchangeRatesDTO
+import com.example.currencyconverterapp.data.remote.DataState
 import kotlinx.coroutines.flow.Flow
 
 /**

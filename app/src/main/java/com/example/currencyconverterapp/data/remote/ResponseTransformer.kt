@@ -5,10 +5,18 @@ package com.example.currencyconverterapp.data.remote
  */
 @SuspensionFunction
 suspend fun <T> ApiResponse<T>.onSuccessSuspend(
-    onResult: suspend ApiResponse.ApiSuccessResponse<T>.() -> Unit
+    onResult: suspend DataState.Success<T>.() -> Unit,
+    onResultNull: suspend DataState.Error<T>.() -> Unit
 ): ApiResponse<T> {
     if (this is ApiResponse.ApiSuccessResponse) {
-        onResult(this)
+        this.data?.let {
+            onResult(DataState.Success(this.data))
+        } ?: run {
+            onResultNull(
+                DataState.Error(handleException<Int>(response.code(), "Something went wrong."))
+            )
+        }
+
     }
     return this
 }
@@ -40,7 +48,8 @@ suspend fun <T> ApiResponse<T>.onExceptionSuspend(
 }
 
 /** A message from the [ApiResponse.ApiFailureResponse.Error]. */
-fun <T> ApiResponse.ApiFailureResponse.Error<T>.message(): String = toString()
+fun <T> ApiResponse.ApiFailureResponse.Error<T>.error(): DataState.Error<T> = DataState.Error(error)
 
 /** A message from the [ApiResponse.ApiFailureResponse.Exception]. */
-fun <T> ApiResponse.ApiFailureResponse.Exception<T>.message(): String = toString()
+fun <T> ApiResponse.ApiFailureResponse.Exception<T>.error(): DataState.Error<T> =
+    DataState.Error(error)

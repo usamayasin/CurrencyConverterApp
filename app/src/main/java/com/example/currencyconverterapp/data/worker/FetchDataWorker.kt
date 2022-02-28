@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.example.currencyconverterapp.data.DataState
 import com.example.currencyconverterapp.data.local.models.CurrencyNamesEntity
 import com.example.currencyconverterapp.data.local.models.CurrencyRatesEntity
 import com.example.currencyconverterapp.data.local.repository.LocalRepository
 import com.example.currencyconverterapp.data.model.toDataBaseModel
+import com.example.currencyconverterapp.data.remote.DataState
 import com.example.currencyconverterapp.data.repository.Repository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject

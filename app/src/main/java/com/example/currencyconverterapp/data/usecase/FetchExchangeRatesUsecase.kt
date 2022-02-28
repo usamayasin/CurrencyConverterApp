@@ -1,12 +1,11 @@
 package com.example.currencyconverterapp.data.usecase
 
-import com.example.currencyconverterapp.data.DataState
 import com.example.currencyconverterapp.data.local.models.CurrencyRatesEntity
 import com.example.currencyconverterapp.data.local.repository.LocalRepository
 import com.example.currencyconverterapp.data.model.toDataBaseModel
+import com.example.currencyconverterapp.data.remote.DataState
 import com.example.currencyconverterapp.data.repository.Repository
 import com.example.currencyconverterapp.utils.Constants
-import com.example.currencyconverterapp.utils.StringUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -14,7 +13,6 @@ import javax.inject.Inject
 
 class FetchExchangeRatesUsecase @Inject constructor(
     private val repository: Repository,
-    private val stringUtils: StringUtils,
     private val localRepo: LocalRepository
 ) {
 
@@ -29,7 +27,7 @@ class FetchExchangeRatesUsecase @Inject constructor(
                 var convertedList: List<CurrencyRatesEntity> = ArrayList()
                 val currencyValue = getCurrencyValue(responseFromDatabase,amount,source)
                 convertedList = createConvertedList(responseFromDatabase, currencyValue)
-                emit(DataState.success(convertedList))
+                emit(DataState.Success(convertedList))
             } else {
                 val rates = repository.getExchangeRates()
                 rates.collect { response ->
@@ -44,13 +42,13 @@ class FetchExchangeRatesUsecase @Inject constructor(
                                     convertedList = createConvertedList(exchangeRatelist, currencyValue)
                                 }
                                 localRepo.insertCurrencyRates(exchangeRatelist)
-                                emit(DataState.success(convertedList))
+                                emit(DataState.Success(convertedList))
                             } else {
-                                emit(DataState.error<List<CurrencyRatesEntity>>(stringUtils.somethingWentWrong()))
+                                emit(DataState.Error<List<CurrencyRatesEntity>>(response.error))
                             }
                         }
                         is DataState.Error -> {
-                            emit(DataState.error<List<CurrencyRatesEntity>>(stringUtils.somethingWentWrong()))
+                            emit(DataState.Error<List<CurrencyRatesEntity>>(response.error))
                         }
                     }
                 }

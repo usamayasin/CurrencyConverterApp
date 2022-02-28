@@ -4,14 +4,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.currencyconverterapp.data.DataState
+import com.example.currencyconverterapp.base.BaseViewModel
 import com.example.currencyconverterapp.data.local.models.CurrencyNamesEntity
 import com.example.currencyconverterapp.data.local.models.CurrencyRatesEntity
+import com.example.currencyconverterapp.data.remote.DataState
 import com.example.currencyconverterapp.data.usecase.FetchCurrenciesUsecase
 import com.example.currencyconverterapp.data.usecase.FetchExchangeRatesUsecase
-import com.example.currencyconverterapp.utils.StringUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -20,9 +21,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val fetchCurrenciesUsecase: FetchCurrenciesUsecase,
-    private val fetchExchangeRatesUsecase: FetchExchangeRatesUsecase,
-    private val stringUtils: StringUtils
-) : ViewModel() {
+    private val fetchExchangeRatesUsecase: FetchExchangeRatesUsecase
+) : BaseViewModel() {
 
     private var _uiState = MutableLiveData<UIState>()
     var uiStateLiveData: LiveData<UIState> = _uiState
@@ -39,19 +39,21 @@ class MainViewModel @Inject constructor(
         fetchCurrenciesFromLocalDB()
     }
 
+
     private fun fetchCurrenciesFromLocalDB() {
-        _uiState.postValue(LoadingState)
+       showLoader()
         viewModelScope.launch(Dispatchers.IO) {
-            fetchCurrenciesUsecase.invoke().collect { dataState ->
+            fetchCurrenciesUsecase.invoke().collect{ dataState ->
                 withContext(Dispatchers.Main) {
                     when(dataState){
                         is DataState.Success -> {
-                            _uiState.postValue(ContentState)
-                            _currenciesList.postValue(dataState.data)
+                           hideLoading()
+                            _currenciesList.postValue(dataState.data!!)
                         }
                         is DataState.Error -> {
-                            _uiState.postValue(ErrorState(stringUtils.somethingWentWrong()))
+                            onResponseComplete(dataState.error)
                         }
+
                     }
                 }
             }
@@ -59,18 +61,18 @@ class MainViewModel @Inject constructor(
     }
 
     fun fetchExchangeRates(source: String, amount: Double) {
-        _exchangeRateUiState.postValue(LoadingState)
+       showLoader()
         viewModelScope.launch(Dispatchers.IO) {
             fetchExchangeRatesUsecase.invoke(source = source, amount = amount)
                 .collect { dataState ->
                     withContext(Dispatchers.Main) {
                         when (dataState) {
                             is DataState.Success -> {
-                                _exchangeRateUiState.postValue(ContentState)
-                                _exchangeRatesList.postValue(dataState.data)
+                                hideLoading()
+                                _exchangeRatesList.postValue(dataState.data!!)
                             }
                             is DataState.Error -> {
-                                _exchangeRateUiState.postValue(ErrorState(dataState.message))
+                               onResponseComplete(dataState.error)
                             }
                         }
                     }

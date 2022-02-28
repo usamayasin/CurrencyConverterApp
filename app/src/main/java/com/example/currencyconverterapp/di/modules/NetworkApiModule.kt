@@ -8,6 +8,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -25,12 +26,25 @@ class NetworkApiModule {
     @Singleton
     @Provides
     fun provideOKHttpClient(): OkHttpClient {
-        val interceptor : HttpLoggingInterceptor = HttpLoggingInterceptor().apply {
+        val interceptor: HttpLoggingInterceptor = HttpLoggingInterceptor().apply {
             this.level = HttpLoggingInterceptor.Level.BODY
         }
+        val apiInterceptor = Interceptor { chain ->
+
+
+            chain.proceed(
+                chain.request().newBuilder()
+                    .addHeader(
+                        "x-api-key", BuildConfig.API_KEY
+                    )
+                    .build()
+            )
+        }
+
         return OkHttpClient.Builder()
             .readTimeout(Constants.TIME_OUT, TimeUnit.SECONDS)
             .connectTimeout(Constants.TIME_OUT, TimeUnit.SECONDS)
+            .addInterceptor(apiInterceptor)
             .addInterceptor(interceptor)
             .build()
     }

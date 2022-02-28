@@ -13,13 +13,11 @@ interface ApiService {
 
     @GET(LIVE_END_POINT)
     suspend fun getExchangeRates(
-        @Query("source") source: String = DEFAULT_SOURCE_CURRENCY,
-        @Query("access_key") apiKey: String = BuildConfig.API_KEY
+        @Query("source") source: String = DEFAULT_SOURCE_CURRENCY
     ): ApiResponse<ExchangeRatesDTO>
 
     @GET(CURRENCIES_END_POINT)
     suspend fun getCurrencies(
-        @Query("access_key") apiKey: String = BuildConfig.API_KEY
     ): ApiResponse<CurrenciesDTO>
 
 }
